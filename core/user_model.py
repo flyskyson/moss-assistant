@@ -165,11 +165,11 @@ class UserModelManager:
         if key in self.user_model["basic_info"]:
             self.user_model["basic_info"][key] = value
             self.memory.save_user_model(self.user_model)
-            print(f"✓ 已更新: {key} = {value}")
+            print(f"[成功] 已更新: {key} = {value}")
 
     def add_goal(self, goal: str, timeframe: str = "short_term"):
         """添加目标"""
         if timeframe in self.user_model["goals"]:
             self.user_model["goals"][timeframe].append(goal)
             self.memory.save_user_model(self.user_model)
-            print(f"✓ 已添加{timeframe}目标: {goal}")
+            print(f"[成功] 已添加{timeframe}目标: {goal}")

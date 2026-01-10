@@ -60,7 +60,7 @@ class PersistentMemory:
             with open(self.user_model_file, 'w', encoding='utf-8') as f:
                 json.dump(user_model, f, ensure_ascii=False, indent=2)
 
-            print(f"✓ 用户模型已保存")
+            print(f"[成功] 用户模型已保存")
         except Exception as e:
             print(f"保存用户模型失败: {e}")
 
@@ -96,7 +96,7 @@ class PersistentMemory:
             with open(self.conversations_file, 'w', encoding='utf-8') as f:
                 json.dump(all_conversations, f, ensure_ascii=False, indent=2)
 
-            print(f"✓ 对话已保存: {conversation_id}")
+            print(f"[成功] 对话已保存: {conversation_id}")
         except Exception as e:
             print(f"保存对话失败: {e}")
 
@@ -106,6 +106,11 @@ class PersistentMemory:
             # 加载现有日志
             with open(self.interaction_log_file, 'r', encoding='utf-8') as f:
                 logs = json.load(f)
+                # 确保是列表
+                if isinstance(logs, dict):
+                    logs = []
+                elif not isinstance(logs, list):
+                    logs = []
         except:
             logs = []
 
@@ -164,7 +169,7 @@ class PersistentMemory:
             with open(backup_file, 'w', encoding='utf-8') as f:
                 json.dump(backup_data, f, ensure_ascii=False, indent=2)
 
-            print(f"✓ 备份已创建: {backup_file}")
+            print(f"[成功] 备份已创建: {backup_file}")
         except Exception as e:
             print(f"备份失败: {e}")
 

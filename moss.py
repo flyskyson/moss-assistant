@@ -14,7 +14,12 @@ try:
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
-    print("⚠️  警告: 未安装 anthropic 库，将使用模拟模式")
+
+try:
+    from openai import OpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
 
 from core.memory import PersistentMemory
 from core.user_model import UserModelManager
@@ -54,18 +59,35 @@ class MOSSAssistant:
 
     def _init_llm(self):
         """初始化 LLM 客户端"""
-        if not ANTHROPIC_AVAILABLE:
-            return None
-
         provider = self.config["llm"]["provider"]
         api_key = os.getenv(self.config["llm"]["api_key_env"])
 
         if not api_key:
-            print("⚠️  警告: 未设置 API Key，请设置环境变量")
+            print("[警告]  警告: 未设置 API Key，请设置环境变量")
+            print(f"   环境变量名: {self.config['llm']['api_key_env']}")
             return None
 
         if provider == "claude":
+            if not ANTHROPIC_AVAILABLE:
+                print("[警告]  警告: 需要安装 anthropic 库")
+                return None
             return anthropic.Anthropic(api_key=api_key)
+
+        elif provider in ["openai", "deepseek"]:
+            if not OPENAI_AVAILABLE:
+                print("[警告]  警告: 需要安装 openai 库")
+                return None
+
+            # DeepSeek 使用 OpenAI 兼容的 API
+            base_url = self.config["llm"].get("base_url")
+            if provider == "deepseek":
+                base_url = base_url or "https://api.deepseek.com"
+
+            return OpenAI(
+                api_key=api_key,
+                base_url=base_url
+            )
+
         else:
             raise ValueError(f"不支持的 LLM 提供商: {provider}")
 
@@ -96,7 +118,7 @@ class MOSSAssistant:
         role_config = routing_result["role_config"]
         reasoning = routing_result["reasoning"]
 
-        print(f"\n🎭 角色路由: {role_config['name']} ({reasoning})")
+        print(f"\n[角色路由] {role_config['name']} ({reasoning})")
 
         # 步骤 2: 构建对话上下文
         messages = self._build_messages(user_input, role)
@@ -188,23 +210,39 @@ class MOSSAssistant:
 
     def _call_llm(self, messages: list, role: str) -> str:
         """调用 LLM"""
-        if not ANTHROPIC_AVAILABLE or not self.llm_client:
+        if not self.llm_client:
             return self._mock_response(role)
 
         try:
-            # 使用 Claude API
+            provider = self.config["llm"]["provider"]
             model = self.config["llm"]["model"]
             max_tokens = self.config["llm"]["max_tokens"]
 
-            response = self.llm_client.messages.create(
-                model=model,
-                max_tokens=max_tokens,
-                messages=messages
-            )
+            if provider == "claude":
+                # 使用 Claude API
+                response = self.llm_client.messages.create(
+                    model=model,
+                    max_tokens=max_tokens,
+                    messages=messages
+                )
+                return response.content[0].text
 
-            return response.content[0].text
+            elif provider in ["openai", "deepseek"]:
+                # 使用 OpenAI 兼容 API
+                response = self.llm_client.chat.completions.create(
+                    model=model,
+                    messages=messages,
+                    max_tokens=max_tokens
+                )
+                return response.choices[0].message.content
+
+            else:
+                return self._mock_response(role)
+
         except Exception as e:
-            print(f"⚠️  LLM 调用失败: {e}")
+            print(f"[警告]  LLM 调用失败: {e}")
+            import traceback
+            traceback.print_exc()
             return self._mock_response(role)
 
     def _mock_response(self, role: str) -> str:
@@ -251,7 +289,7 @@ class MOSSAssistant:
         user_model["stats"]["total_conversations"] += 1
         self.memory.save_user_model(user_model)
 
-        print(f"\n✓ 对话已保存: {self.current_conversation['id']}")
+        print(f"\n[成功] 对话已保存: {self.current_conversation['id']}")
 
     def update_user_info(self, key: str, value: Any):
         """更新用户信息"""
