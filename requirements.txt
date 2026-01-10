@@ -1,0 +1,23 @@
+# MOSS Assistant 依赖包
+
+# 核心
+pyyaml>=6.0
+anthropic>=0.18.0
+
+# Web UI
+streamlit>=1.28.0
+
+# 数据处理（可选，用于后续增强）
+# pandas>=2.0.0
+# numpy>=1.24.0
+
+# 向量数据库（可选，用于语义搜索）
+# chromadb>=0.4.0
+# pinecone-client>=2.2.0
+
+# 知识图谱（可选）
+# neo4j>=5.0.0
+
+# 开发工具
+# pytest>=7.0.0
+# black>=23.0.0
