@@ -158,26 +158,53 @@ class OfficeWorkspaceIntegration:
             # 降级方案：使用简单的文件扫描
             structure = {}
 
-            main_dirs = [
-                "00_Agent_Library",
-                "01_Active_Projects",
-                "02_Project_Archive",
-                "03_Code_Templates",
-                "04_Data_&_Resources",
-                "05_Outputs",
-                "06_Learning_Journal"
-            ]
+            # 检查是否是 Office Workspace 的标准目录
+            is_office_workspace = (self.workspace_path / "00_Agent_Library").exists()
 
-            for dir_name in main_dirs:
-                dir_path = self.workspace_path / dir_name
-                if dir_path.exists():
-                    files = list(dir_path.rglob("*"))
-                    structure[dir_name] = {
-                        "path": str(dir_path),
-                        "file_count": len([f for f in files if f.is_file()]),
-                        "dir_count": len([d for d in files if d.is_dir()]),
-                        "size_mb": sum(f.stat().st_size for f in files if f.is_file()) / (1024 * 1024)
+            if is_office_workspace:
+                # Office Workspace 标准目录
+                main_dirs = [
+                    "00_Agent_Library",
+                    "01_Active_Projects",
+                    "02_Project_Archive",
+                    "03_Code_Templates",
+                    "04_Data_&_Resources",
+                    "05_Outputs",
+                    "06_Learning_Journal"
+                ]
+
+                for dir_name in main_dirs:
+                    dir_path = self.workspace_path / dir_name
+                    if dir_path.exists():
+                        files = list(dir_path.rglob("*"))
+                        structure[dir_name] = {
+                            "path": str(dir_path),
+                            "file_count": len([f for f in files if f.is_file()]),
+                            "dir_count": len([d for d in files if d.is_dir()]),
+                            "size_mb": sum(f.stat().st_size for f in files if f.is_file()) / (1024 * 1024)
+                        }
+            else:
+                # 通用目录扫描（任意路径）
+                try:
+                    all_items = list(self.workspace_path.iterdir())
+
+                    # 统计文件和目录
+                    files = [f for f in all_items if f.is_file()]
+                    dirs = [d for d in all_items if d.is_dir()]
+
+                    structure["_top_level"] = {
+                        "files": [{"name": f.name, "size_kb": f.stat().st_size / 1024} for f in files[:20]],  # 最多显示20个文件
+                        "directories": [{"name": d.name} for d in dirs[:20]],  # 最多显示20个目录
+                        "total_files": len(files),
+                        "total_dirs": len(dirs),
+                        "total_size_mb": sum(f.stat().st_size for f in files) / (1024 * 1024)
                     }
+
+                    # 添加完整文件列表（用于调试）
+                    structure["_all_files"] = [f.name for f in files]
+
+                except Exception as scan_error:
+                    return {"success": False, "error": f"扫描失败: {str(scan_error)}"}
 
             return {
                 "success": True,

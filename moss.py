@@ -122,7 +122,11 @@ class MOSSAssistant:
         """
         # 定义工具调用关键词
         tool_keywords = {
-            "scan_workspace": ["扫描工作区", "扫描项目", "工作区现状", "生成报告", "健康报告", "诊断报告"],
+            "scan_workspace": [
+                "扫描工作区", "扫描项目", "工作区现状", "生成报告", "健康报告", "诊断报告",
+                "扫描", "查看文件", "文件结构", "目录结构", "优化建议",
+                "scan", "扫描路径", "扫描文件"
+            ],
             "query_projects": ["项目列表", "查看项目", "项目状态", "所有项目"],
             "get_memory": ["读取记忆", "AI记忆", "我的档案"],
             "get_structure": ["项目结构", "文件结构", "目录结构"],
@@ -132,19 +136,51 @@ class MOSSAssistant:
         should_call_tool = False
         tool_type = None
 
-        for tool_name, keywords in tool_keywords.items():
-            if any(keyword in user_input for keyword in keywords):
-                should_call_tool = True
-                tool_type = tool_name
-                break
+        # 特殊检测：如果用户输入包含 Windows 路径格式，视为扫描请求
+        import re
+        if re.search(r'[A-Z]:\\.*\s*(扫描|查看|文件|结构|优化)', user_input):
+            should_call_tool = True
+            tool_type = "scan_workspace"
+
+        if not should_call_tool:
+            for tool_name, keywords in tool_keywords.items():
+                if any(keyword in user_input for keyword in keywords):
+                    should_call_tool = True
+                    tool_type = tool_name
+                    break
 
         if should_call_tool:
             try:
                 from core.workspace_integration import OfficeWorkspaceIntegration
                 import json
 
+                # 提取用户指定的路径（如果有）
+                import re
+                # 匹配 Windows 路径格式，在遇到中文或特殊字符前停止
+                path_match = re.search(r'([A-Z]:\\(?:[^a-zA-Z0-9_\-\.\\]+\([^)]*\)[^a-zA-Z0-9_\-\.\\]*)*[^a-zA-Z0-9_\-\.\\，]+)', user_input)
+                if not path_match:
+                    # 更简单：匹配到第一个非路径字符
+                    path_match = re.search(r'([A-Z]:\\[^\\，"]*(?:\\[^\\，"]*)*)', user_input)
+                    if path_match:
+                        # 清理末尾可能的非路径字符
+                        matched = path_match.group(1)
+                        custom_path = matched.rstrip('的文件并给我')
+                    else:
+                        custom_path = None
+                else:
+                    custom_path = path_match.group(1)
+
                 # 初始化工作区集成
-                workspace = OfficeWorkspaceIntegration()
+                if custom_path:
+                    # 使用用户指定的路径
+                    from pathlib import Path
+                    custom_workspace = Path(custom_path)
+                    if not custom_workspace.exists():
+                        return f"指定的路径不存在: {custom_path}"
+                    workspace = OfficeWorkspaceIntegration(str(custom_workspace))
+                else:
+                    # 使用默认的 Office Workspace
+                    workspace = OfficeWorkspaceIntegration()
 
                 if not workspace.enabled:
                     return "工作区路径不存在或无法访问，请检查路径是否正确"
@@ -253,14 +289,43 @@ class MOSSAssistant:
                                 ""
                             ]
 
-                            for dir_name, info in structure.items():
+                            # 检查是否是通用扫描格式
+                            if "_top_level" in structure:
+                                # 通用目录扫描
+                                top = structure["_top_level"]
                                 report_lines.extend([
-                                    f"📁 {dir_name}",
-                                    f"   - 文件数: {info['file_count']}",
-                                    f"   - 目录数: {info['dir_count']}",
-                                    f"   - 大小: {info['size_mb']:.2f} MB",
+                                    f"总文件数: {top['total_files']} 个",
+                                    f"总目录数: {top['total_dirs']} 个",
+                                    f"总大小: {top['total_size_mb']:.2f} MB",
                                     ""
                                 ])
+
+                                # 显示文件列表（前20个）
+                                if top['files']:
+                                    report_lines.append("【主要文件】")
+                                    for f in top['files'][:15]:
+                                        report_lines.append(f"  - {f['name']} ({f['size_kb']:.1f} KB)")
+                                    report_lines.append("")
+
+                                # 显示目录列表（前20个）
+                                if top['directories']:
+                                    report_lines.append("【主要目录】")
+                                    for d in top['directories'][:15]:
+                                        report_lines.append(f"  📁 {d['name']}")
+                                    if len(top['directories']) > 15:
+                                        report_lines.append(f"  ... 还有 {len(top['directories']) - 15} 个目录")
+                                    report_lines.append("")
+
+                            else:
+                                # Office Workspace 标准格式
+                                for dir_name, info in structure.items():
+                                    report_lines.extend([
+                                        f"📁 {dir_name}",
+                                        f"   - 文件数: {info['file_count']}",
+                                        f"   - 目录数: {info['dir_count']}",
+                                        f"   - 大小: {info['size_mb']:.2f} MB",
+                                        ""
+                                    ])
 
                             return "\n".join(report_lines)
                     else:
