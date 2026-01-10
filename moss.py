@@ -110,11 +110,88 @@ class MOSSAssistant:
 
         return summary
 
+    def _check_and_call_tools(self, user_input: str) -> str:
+        """
+        检查是否需要调用工具，并执行
+
+        Args:
+            user_input: 用户输入
+
+        Returns:
+            工具调用结果，如果不需要调用则返回 None
+        """
+        # 定义工具调用关键词
+        tool_keywords = {
+            "scan_workspace": ["扫描工作区", "扫描项目", "工作区现状", "生成报告", "健康报告"],
+            "get_structure": ["项目结构", "文件结构", "目录结构"],
+        }
+
+        # 检查是否需要调用工具
+        if any(keyword in user_input for keywords in tool_keywords.values() for keyword in keywords):
+            try:
+                from core.workspace_integration import OfficeWorkspaceIntegration
+                import json
+
+                # 初始化工作区集成
+                workspace = OfficeWorkspaceIntegration()
+
+                if not workspace.enabled:
+                    return "工作区路径不存在或无法访问"
+
+                # 根据关键词调用不同工具
+                if any(kw in user_input for kw in tool_keywords["scan_workspace"]):
+                    # 调用项目结构扫描
+                    result = workspace.get_project_structure()
+                    if result.get("success"):
+                        structure = result.get("structure", {})
+
+                        # 格式化输出
+                        report_lines = [
+                            "=== 工作区扫描结果 ===",
+                            f"扫描路径: {result.get('workspace_path')}",
+                            f"扫描时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                            ""
+                        ]
+
+                        for dir_name, info in structure.items():
+                            report_lines.extend([
+                                f"📁 {dir_name}",
+                                f"   - 文件数: {info['file_count']}",
+                                f"   - 目录数: {info['dir_count']}",
+                                f"   - 大小: {info['size_mb']:.2f} MB",
+                                ""
+                            ])
+
+                        return "\n".join(report_lines)
+                    else:
+                        return f"扫描失败: {result.get('error', '未知错误')}"
+
+                elif any(kw in user_input for kw in tool_keywords["get_structure"]):
+                    # 获取项目结构
+                    result = workspace.get_project_structure()
+                    if result.get("success"):
+                        return json.dumps(result, indent=2, ensure_ascii=False)
+                    else:
+                        return f"获取结构失败: {result.get('error', '未知错误')}"
+
+            except Exception as e:
+                return f"工具调用出错: {str(e)}"
+
+        return None
+
     def chat(self, user_input: str) -> str:
         """处理用户输入"""
+        # 步骤 0: 检查是否需要调用工具
+        tool_result = self._check_and_call_tools(user_input)
+        if tool_result:
+            # 如果工具调用成功，将工具结果注入到对话中
+            enhanced_input = f"{user_input}\n\n【工具调用结果】\n{tool_result}"
+        else:
+            enhanced_input = user_input
+
         # 步骤 1: 路由到合适的角色
         user_model = self.user_model_manager.get_model()
-        routing_result = self.router.route(user_input, user_model)
+        routing_result = self.router.route(enhanced_input, user_model)
 
         role = routing_result["role"]
         role_config = routing_result["role_config"]
@@ -123,7 +200,7 @@ class MOSSAssistant:
         print(f"\n[角色路由] {role_config['name']} ({reasoning})")
 
         # 步骤 2: 构建对话上下文
-        messages = self._build_messages(user_input, role)
+        messages = self._build_messages(enhanced_input, role)
 
         # 步骤 3: 调用 LLM
         response = self._call_llm(messages, role)
