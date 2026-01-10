@@ -1,0 +1,70 @@
+MOSS Assistant 项目结构
+=======================
+
+moss-assistant/
+│
+├── 📄 核心文件
+│   ├── moss.py              # 主程序（核心逻辑）
+│   ├── app.py               # Web UI 界面
+│   ├── config.yaml          # 配置文件（重要！）
+│   └── requirements.txt     # 依赖包列表
+│
+├── 🚀 启动脚本
+│   ├── start.bat            # Windows 启动
+│   └── start.sh             # Mac/Linux 启动
+│
+├── 📚 文档
+│   ├── README.md            # 完整说明（英文）
+│   ├── 使用说明.md          # 快速指南（中文）⭐
+│   ├── QUICKSTART.md        # 快速开始
+│   ├── PROJECT_SUMMARY.md   # 项目总结
+│   ├── ROADMAP.md           # 发展路线
+│   └── .env.example         # 环境变量示例
+│
+├── 🔧 核心模块 (core/)
+│   ├── memory.py            # 持久化记忆系统
+│   ├── user_model.py        # 用户模型管理
+│   └── router.py            # 角色路由系统
+│
+├── 🧪 测试 (tests/)
+│   └── test_basic.py        # 基础测试
+│
+├── 💾 数据存储 (data/)      # 自动生成
+│   ├── user_model.json      # 你的数字模型
+│   ├── conversations.json   # 对话历史
+│   ├── interactions.json    # 交互日志
+│   └── backups/             # 数据备份
+│
+├── 📝 Prompts (prompts/)    # 未来扩展
+│   └── roles/               # 角色定义
+│
+└── 🎯 Git 管理
+    ├── .git/                # Git 仓库
+    └── .gitignore           # 忽略规则
+
+=======================
+
+📊 项目统计
+- 总代码文件: 7 个
+- 总文档文件: 5 个
+- 核心功能: 4 个角色
+- 配置项: 20+ 个可调参数
+
+=======================
+
+🎯 核心特性
+✓ 四层角色系统 (导师/伙伴/秘书/朋友)
+✓ 持久化记忆 (永远记住你)
+✓ 智能路由 (自动选择角色)
+✓ 配置驱动 (无需改代码)
+✓ Web UI + 命令行 (两种界面)
+✓ Git 版本控制 (可接入 GitHub)
+
+=======================
+
+🚀 立即开始
+1. pip install -r requirements.txt
+2. export ANTHROPIC_API_KEY="你的密钥"
+3. streamlit run app.py
+
+=======================
