@@ -122,12 +122,23 @@ class MOSSAssistant:
         """
         # 定义工具调用关键词
         tool_keywords = {
-            "scan_workspace": ["扫描工作区", "扫描项目", "工作区现状", "生成报告", "健康报告"],
+            "scan_workspace": ["扫描工作区", "扫描项目", "工作区现状", "生成报告", "健康报告", "诊断报告"],
+            "query_projects": ["项目列表", "查看项目", "项目状态", "所有项目"],
+            "get_memory": ["读取记忆", "AI记忆", "我的档案"],
             "get_structure": ["项目结构", "文件结构", "目录结构"],
         }
 
         # 检查是否需要调用工具
-        if any(keyword in user_input for keywords in tool_keywords.values() for keyword in keywords):
+        should_call_tool = False
+        tool_type = None
+
+        for tool_name, keywords in tool_keywords.items():
+            if any(keyword in user_input for keyword in keywords):
+                should_call_tool = True
+                tool_type = tool_name
+                break
+
+        if should_call_tool:
             try:
                 from core.workspace_integration import OfficeWorkspaceIntegration
                 import json
@@ -136,37 +147,149 @@ class MOSSAssistant:
                 workspace = OfficeWorkspaceIntegration()
 
                 if not workspace.enabled:
-                    return "工作区路径不存在或无法访问"
+                    return "工作区路径不存在或无法访问，请检查路径是否正确"
 
-                # 根据关键词调用不同工具
-                if any(kw in user_input for kw in tool_keywords["scan_workspace"]):
-                    # 调用项目结构扫描
+                # 根据工具类型调用不同方法
+                if tool_type == "scan_workspace":
+                    # 调用超级管家扫描
                     result = workspace.get_project_structure()
+
                     if result.get("success"):
-                        structure = result.get("structure", {})
+                        source = result.get("source", "未知")
 
-                        # 格式化输出
-                        report_lines = [
-                            "=== 工作区扫描结果 ===",
-                            f"扫描路径: {result.get('workspace_path')}",
-                            f"扫描时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                            ""
-                        ]
+                        if source == "超级管家" and "data" in result:
+                            # 超级管家返回的完整数据
+                            data = result["data"]
 
-                        for dir_name, info in structure.items():
-                            report_lines.extend([
-                                f"📁 {dir_name}",
-                                f"   - 文件数: {info['file_count']}",
-                                f"   - 目录数: {info['dir_count']}",
-                                f"   - 大小: {info['size_mb']:.2f} MB",
+                            report_lines = [
+                                "=== 工作区扫描报告（超级管家）===",
+                                f"生成时间: {data.get('timestamp', '未知')}",
+                                f"工作区路径: {data.get('workspace_path', '未知')}",
                                 ""
-                            ])
+                            ]
 
-                        return "\n".join(report_lines)
+                            # MCP服务器
+                            if "mcp_servers" in data:
+                                mcp = data["mcp_servers"]
+                                report_lines.extend([
+                                    "【MCP服务器】",
+                                    f"状态: {mcp.get('status', '未知')}",
+                                    f"数量: {mcp.get('count', 0)} 个"
+                                ])
+                                for server in mcp.get("servers", []):
+                                    report_lines.append(f"  - {server.get('name', '未知')}")
+                                report_lines.append("")
+
+                            # 数据新鲜度
+                            if "data_freshness" in data:
+                                fresh = data["data_freshness"]
+                                if fresh.get("index_exists"):
+                                    report_lines.extend([
+                                        "【数据状态】",
+                                        f"最后扫描: {fresh.get('last_scan', '未知')}",
+                                        f"数据年龄: {fresh.get('age_hours', 0)} 小时",
+                                        f"新鲜度: {fresh.get('freshness', '未知')}",
+                                        f"建议: {fresh.get('recommendation', '无')}",
+                                        ""
+                                    ])
+
+                            # 项目
+                            if "projects" in data:
+                                projects = data["projects"]
+                                report_lines.extend([
+                                    "【项目资产】",
+                                    f"活跃项目: {projects.get('active_count', 0)} 个"
+                                ])
+
+                                for p in projects.get("active", []):
+                                    report_lines.append(
+                                        f"  - {p.get('name', '未知'):30s} | "
+                                        f"{p.get('last_modified', '未知')} | "
+                                        f"{p.get('py_files', 0)}个文件"
+                                    )
+
+                                report_lines.append(
+                                    f"归档项目: {projects.get('archived_count', 0)} 个"
+                                )
+                                for p in projects.get("archived", []):
+                                    report_lines.append(f"  - {p.get('name', '未知')}")
+                                report_lines.append("")
+
+                            # 工具
+                            if "tools" in data:
+                                tools = data["tools"]
+                                if "error" not in tools:
+                                    report_lines.extend([
+                                        "【工具脚本】",
+                                        f"Python工具: {tools.get('python_tools_count', 0)} 个",
+                                        f"批处理脚本: {tools.get('batch_scripts_count', 0)} 个",
+                                        ""
+                                    ])
+
+                            # 笔记
+                            if "notes" in data:
+                                notes = data["notes"]
+                                report_lines.extend([
+                                    "【笔记和文档】",
+                                    f"分类数量: {notes.get('total_categories', 0)} 个"
+                                ])
+                                for cat in notes.get("categories", []):
+                                    report_lines.append(
+                                        f"  - {cat.get('type', '未知')}: "
+                                        f"{cat.get('count', 0)}个文件 "
+                                        f"({cat.get('location', '未知')})"
+                                    )
+                                report_lines.append("")
+
+                            return "\n".join(report_lines)
+
+                        else:
+                            # 降级方案：使用简单扫描
+                            structure = result.get("structure", {})
+                            report_lines = [
+                                "=== 工作区扫描结果 ===",
+                                f"扫描路径: {result.get('workspace_path')}",
+                                f"扫描时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+                                ""
+                            ]
+
+                            for dir_name, info in structure.items():
+                                report_lines.extend([
+                                    f"📁 {dir_name}",
+                                    f"   - 文件数: {info['file_count']}",
+                                    f"   - 目录数: {info['dir_count']}",
+                                    f"   - 大小: {info['size_mb']:.2f} MB",
+                                    ""
+                                ])
+
+                            return "\n".join(report_lines)
                     else:
                         return f"扫描失败: {result.get('error', '未知错误')}"
 
-                elif any(kw in user_input for kw in tool_keywords["get_structure"]):
+                elif tool_type == "query_projects":
+                    # 查询项目状态
+                    result = workspace.query_projects()
+
+                    if result.get("success"):
+                        return f"【项目查询结果】\n\n{result.get('output', '')}"
+                    else:
+                        return f"查询失败: {result.get('error', '未知错误')}"
+
+                elif tool_type == "get_memory":
+                    # 读取AI记忆
+                    result = workspace.get_memory_info()
+
+                    if result.get("success"):
+                        content = result.get("content", "")
+                        # 只返回前1000个字符，避免太长
+                        preview = content[:1000]
+                        if len(content) > 1000:
+                            preview += "\n\n...(内容过长，已截断)"
+                        return f"【AI记忆内容】\n\n文件路径: {result.get('file_path')}\n\n{preview}"
+                    else:
+                        return f"读取失败: {result.get('error', '未知错误')}"
+
+                elif tool_type == "get_structure":
                     # 获取项目结构
                     result = workspace.get_project_structure()
                     if result.get("success"):
@@ -175,7 +298,8 @@ class MOSSAssistant:
                         return f"获取结构失败: {result.get('error', '未知错误')}"
 
             except Exception as e:
-                return f"工具调用出错: {str(e)}"
+                import traceback
+                return f"工具调用出错: {str(e)}\n\n详细错误:\n{traceback.format_exc()}"
 
         return None
 

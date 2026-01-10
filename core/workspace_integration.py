@@ -126,14 +126,38 @@ class OfficeWorkspaceIntegration:
             return {"success": False, "error": str(e)}
 
     def get_project_structure(self) -> Dict[str, Any]:
-        """获取项目结构"""
+        """获取项目结构 - 调用超级管家"""
         if not self.enabled:
             return {"success": False, "error": "工作区路径不存在"}
 
         try:
+            # 优先调用超级管家脚本
+            super_butler_script = self.workspace_path / "超级管家.py"
+
+            if super_butler_script.exists():
+                result = subprocess.run(
+                    f'python "{super_butler_script}" --json-only',
+                    shell=True,
+                    capture_output=True,
+                    text=True,
+                    cwd=self.workspace_path
+                )
+
+                if result.returncode == 0:
+                    # 超级管家返回的是JSON
+                    try:
+                        report_data = json.loads(result.stdout)
+                        return {
+                            "success": True,
+                            "source": "超级管家",
+                            "data": report_data
+                        }
+                    except json.JSONDecodeError:
+                        pass
+
+            # 降级方案：使用简单的文件扫描
             structure = {}
 
-            # 扫描主要目录
             main_dirs = [
                 "00_Agent_Library",
                 "01_Active_Projects",
@@ -147,7 +171,6 @@ class OfficeWorkspaceIntegration:
             for dir_name in main_dirs:
                 dir_path = self.workspace_path / dir_name
                 if dir_path.exists():
-                    # 统计文件和子目录
                     files = list(dir_path.rglob("*"))
                     structure[dir_name] = {
                         "path": str(dir_path),
@@ -158,8 +181,83 @@ class OfficeWorkspaceIntegration:
 
             return {
                 "success": True,
+                "source": "直接扫描",
                 "structure": structure,
                 "workspace_path": str(self.workspace_path)
+            }
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def query_projects(self) -> Dict[str, Any]:
+        """查询项目状态 - 调用智能管家项目查询"""
+        if not self.enabled:
+            return {"success": False, "error": "工作区路径不存在"}
+
+        try:
+            query_script = self.workspace_path / "智能管家项目查询.py"
+
+            if not query_script.exists():
+                return {"success": False, "error": "查询脚本不存在"}
+
+            result = subprocess.run(
+                f'python "{query_script}" list',
+                shell=True,
+                capture_output=True,
+                text=True,
+                cwd=self.workspace_path
+            )
+
+            return {
+                "success": result.returncode == 0,
+                "output": result.stdout,
+                "error": result.stderr if result.stderr else None
+            }
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_memory_info(self) -> Dict[str, Any]:
+        """读取工作区记忆（AI_MEMORY.md）"""
+        if not self.enabled:
+            return {"success": False, "error": "工作区路径不存在"}
+
+        try:
+            memory_file = self.workspace_path / "06_Learning_Journal" / "AI_MEMORY.md"
+
+            if not memory_file.exists():
+                return {"success": False, "error": "记忆文件不存在"}
+
+            content = memory_file.read_text(encoding='utf-8')
+
+            return {
+                "success": True,
+                "content": content,
+                "file_path": str(memory_file)
+            }
+
+        except Exception as e:
+            return {"success": False, "error": str(e)}
+
+    def get_workspace_index(self) -> Dict[str, Any]:
+        """读取工作区索引（workspace_index_latest.json）"""
+        if not self.enabled:
+            return {"success": False, "error": "工作区路径不存在"}
+
+        try:
+            index_file = self.workspace_path / "06_Learning_Journal" / "workspace_memory" / "workspace_index_latest.json"
+
+            if not index_file.exists():
+                return {"success": False, "error": "索引文件不存在"}
+
+            content = index_file.read_text(encoding='utf-8')
+            data = json.loads(content)
+
+            return {
+                "success": True,
+                "data": data,
+                "scan_time": data.get('scan_time'),
+                "file_path": str(index_file)
             }
 
         except Exception as e:
