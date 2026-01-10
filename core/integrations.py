@@ -1,0 +1,183 @@
+"""
+外部系统集成接口
+用于连接工作区文件管家等其他智能体
+"""
+
+from typing import Dict, Any, Optional
+import subprocess
+import json
+from pathlib import Path
+from core.workspace_integration import OfficeWorkspaceIntegration
+
+
+class WorkspaceManagerIntegration:
+    """工作区文件管家集成"""
+
+    def __init__(self, manager_path: Optional[str] = None):
+        """
+        初始化工作区管家集成
+
+        Args:
+            manager_path: 工作区管家的路径
+        """
+        self.manager_path = manager_path
+        self.enabled = manager_path is not None
+
+    def execute_command(self, command: str) -> Dict[str, Any]:
+        """
+        执行工作区管家的命令
+
+        Args:
+            command: 命令内容
+
+        Returns:
+            执行结果
+        """
+        if not self.enabled:
+            return {
+                "success": False,
+                "error": "工作区管家未启用"
+            }
+
+        try:
+            # 这里需要根据实际的管家 API 实现
+            # 示例：通过命令行调用
+            result = subprocess.run(
+                f"{self.manager_path} {command}",
+                shell=True,
+                capture_output=True,
+                text=True
+            )
+
+            return {
+                "success": result.returncode == 0,
+                "output": result.stdout,
+                "error": result.stderr
+            }
+
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+    def organize_files(self, directory: str) -> Dict[str, Any]:
+        """整理文件"""
+        return self.execute_command(f"organize {directory}")
+
+    def search_files(self, pattern: str) -> Dict[str, Any]:
+        """搜索文件"""
+        return self.execute_command(f"search {pattern}")
+
+    def analyze_structure(self, path: str) -> Dict[str, Any]:
+        """分析目录结构"""
+        return self.execute_command(f"analyze {path}")
+
+
+class ExternalAgentManager:
+    """外部智能体管理器"""
+
+    def __init__(self):
+        self.agents = {}
+        self._register_default_agents()
+
+    def _register_default_agents(self):
+        """注册默认的智能体"""
+        # Office Workspace（工作区管理）
+        self.agents["office_workspace"] = {
+            "name": "Office Workspace",
+            "integration": OfficeWorkspaceIntegration,
+            "enabled": True,
+            "path": "C:\\Users\\flyskyson\\Office_Agent_Workspace"
+        }
+
+        # 工作区文件管家（旧版，保留兼容性）
+        self.agents["workspace_manager"] = {
+            "name": "工作区文件管家",
+            "integration": WorkspaceManagerIntegration,
+            "enabled": False
+        }
+
+    def register_agent(self, agent_id: str, config: Dict[str, Any]):
+        """
+        注册新的智能体
+
+        Args:
+            agent_id: 智能体 ID
+            config: 配置信息
+        """
+        self.agents[agent_id] = config
+
+    def get_agent(self, agent_id: str) -> Optional[Any]:
+        """
+        获取智能体实例
+
+        Args:
+            agent_id: 智能体 ID
+
+        Returns:
+            智能体实例
+        """
+        if agent_id not in self.agents:
+            return None
+
+        agent_config = self.agents[agent_id]
+
+        if not agent_config.get("enabled", False):
+            return None
+
+        integration_class = agent_config.get("integration")
+        if integration_class:
+            return integration_class(agent_config.get("path"))
+
+        return None
+
+    def call_agent(self, agent_id: str, method: str, *args, **kwargs) -> Dict[str, Any]:
+        """
+        调用智能体的方法
+
+        Args:
+            agent_id: 智能体 ID
+            method: 方法名
+            *args: 位置参数
+            **kwargs: 关键字参数
+
+        Returns:
+            执行结果
+        """
+        agent = self.get_agent(agent_id)
+
+        if not agent:
+            return {
+                "success": False,
+                "error": f"智能体 {agent_id} 不可用"
+            }
+
+        try:
+            method_func = getattr(agent, method, None)
+            if method_func:
+                return method_func(*args, **kwargs)
+            else:
+                return {
+                    "success": False,
+                    "error": f"方法 {method} 不存在"
+                }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+# 使用示例
+if __name__ == "__main__":
+    # 创建管理器
+    manager = ExternalAgentManager()
+
+    # 注册工作区管家（如果有路径）
+    # manager.agents["workspace_manager"]["enabled"] = True
+    # manager.agents["workspace_manager"]["path"] = "/path/to/manager"
+
+    # 调用智能体
+    # result = manager.call_agent("workspace_manager", "organize_files", ".")
+    # print(result)

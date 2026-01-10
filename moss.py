@@ -24,6 +24,7 @@ except ImportError:
 from core.memory import PersistentMemory
 from core.user_model import UserModelManager
 from core.router import RoleRouter
+from core.integrations import ExternalAgentManager
 
 
 class MOSSAssistant:
@@ -37,6 +38,7 @@ class MOSSAssistant:
         self.memory = PersistentMemory(self.config)
         self.user_model_manager = UserModelManager(self.memory)
         self.router = RoleRouter(self.config)
+        self.external_agents = ExternalAgentManager()  # 外部智能体管理器
 
         # 初始化 LLM
         self.llm_client = self._init_llm()
@@ -302,6 +304,31 @@ class MOSSAssistant:
     def backup(self):
         """备份数据"""
         self.memory.backup()
+
+    def call_external_agent(self, agent_id: str, method: str, *args, **kwargs) -> Dict[str, Any]:
+        """
+        调用外部智能体
+
+        Args:
+            agent_id: 智能体 ID (如 "workspace_manager")
+            method: 方法名
+            *args: 位置参数
+            **kwargs: 关键字参数
+
+        Returns:
+            执行结果
+        """
+        return self.external_agents.call_agent(agent_id, method, *args, **kwargs)
+
+    def register_agent(self, agent_id: str, config: Dict[str, Any]):
+        """
+        注册新的外部智能体
+
+        Args:
+            agent_id: 智能体 ID
+            config: 配置信息
+        """
+        self.external_agents.register_agent(agent_id, config)
 
 
 def main():

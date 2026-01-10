@@ -1,0 +1,111 @@
+{
+  "folders": [
+    {
+      "name": "MOSS Assistant",
+      "path": "."
+    },
+    {
+      "name": "核心模块",
+      "path": "./core"
+    },
+    {
+      "name": "数据存储",
+      "path": "./data"
+    },
+    {
+      "name": "文档",
+      "path": "./docs"
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "python",
+    "editor.formatOnSave": true,
+    "editor.fontSize": 14,
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/*.pyc": true,
+      "**/.git": true
+    },
+    "files.watcherExclude": {
+      "**/data/**": true,
+      "**/.git/**": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "stuart.unique.id",
+      "eamodio.gitlens"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "启动 MOSS",
+        "type": "python",
+        "request": "launch",
+        "program": "start_moss.py",
+        "console": "integratedTerminal",
+        "env": {
+          "DEEPSEEK_API_KEY": "sk-263512fcfa5348c1ad321d98616c3f85"
+        }
+      },
+      {
+        "name": "运行 Streamlit",
+        "type": "python",
+        "request": "launch",
+        "module": "streamlit",
+        "args": [
+          "run",
+          "app.py"
+        ],
+        "console": "integratedTerminal",
+        "env": {
+          "DEEPSEEK_API_KEY": "sk-263512fcfa5348c1ad321d98616c3f85"
+        }
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "启动 MOSS",
+        "type": "shell",
+        "command": "python start_moss.py",
+        "group": "build",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": true,
+          "panel": "new"
+        }
+      },
+      {
+        "label": "查看日志",
+        "type": "shell",
+        "command": "tail -100 streamlit.log",
+        "group": "test",
+        "presentation": {
+          "echo": true,
+          "reveal": "always",
+          "focus": true
+        }
+      },
+      {
+        "label": "备份数据",
+        "type": "shell",
+        "command": "cp -r data/ backups/data_$(date +%Y%m%d)/",
+        "group": "build"
+      },
+      {
+        "label": "运行测试",
+        "type": "shell",
+        "command": "python tests/test_basic.py",
+        "group": "test"
+      }
+    ]
+  }
+}
