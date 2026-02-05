@@ -1,0 +1,117 @@
+{
+  "meta": {
+    "lastTouchedVersion": "2026.1.24-3",
+    "lastTouchedAt": "2026-02-04T04:33:45.659Z"
+  },
+  "wizard": {
+    "lastRunAt": "2026-02-04T04:33:45.647Z",
+    "lastRunVersion": "2026.1.24-3",
+    "lastRunCommand": "onboard",
+    "lastRunMode": "local"
+  },
+  "auth": {
+    "profiles": {
+      "zai:default": {
+        "provider": "zai",
+        "mode": "api_key"
+      },
+      "moonshot:default": {
+        "provider": "moonshot",
+        "mode": "api_key"
+      },
+      "openrouter:default": {
+        "provider": "openrouter",
+        "mode": "api_key"
+      }
+    }
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "moonshot": {
+        "baseUrl": "https://api.moonshot.ai/v1",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "kimi-k2-0905-preview",
+            "name": "Kimi K2 0905 Preview",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "cost": {
+              "input": 0,
+              "output": 0,
+              "cacheRead": 0,
+              "cacheWrite": 0
+            },
+            "contextWindow": 256000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  },
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "openrouter/deepseek/deepseek-chat",
+        "fallbacks": [
+          "openrouter/anthropic/claude-sonnet-4-5-20250929"
+        ]
+      },
+      "models": {
+        "openrouter/deepseek/deepseek-chat": {
+          "alias": "DeepSeek"
+        },
+        "openrouter/anthropic/claude-sonnet-4-5-20250929": {
+          "alias": "Sonnet 4.5"
+        },
+        "zai/glm-4.7": {
+          "alias": "GLM"
+        },
+        "moonshot/kimi-k2-0905-preview": {
+          "alias": "Kimi K2"
+        }
+      },
+      "workspace": "/Users/lijian/clawd",
+      "memorySearch": {
+        "provider": "openai",
+        "model": "nomic-embed-text",
+        "remote": {
+          "baseUrl": "http://localhost:11434/v1",
+          "apiKey": "ollama"
+        }
+      },
+      "maxConcurrent": 4,
+      "subagents": {
+        "maxConcurrent": 8
+      }
+    }
+  },
+  "messages": {
+    "ackReactionScope": "group-mentions"
+  },
+  "commands": {
+    "native": "auto",
+    "nativeSkills": "auto"
+  },
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "loopback",
+    "auth": {
+      "mode": "token",
+      "token": "1ec3971c344d54f0d9024d80b1a63574441a9a81cd088d5d"
+    },
+    "tailscale": {
+      "mode": "off",
+      "resetOnExit": false
+    }
+  },
+  "skills": {
+    "install": {
+      "nodeManager": "pnpm"
+    }
+  }
+}

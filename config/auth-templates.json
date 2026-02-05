@@ -1,0 +1,30 @@
+{
+  "_comment": "OpenClaw Agent 认证配置模板 - 复制到各 Agent 目录使用",
+  "version": 1,
+  "profiles": {
+    "deepseek:default": {
+      "type": "api_key",
+      "provider": "deepseek",
+      "key": "YOUR_DEEPSEEK_API_KEY_HERE"
+    },
+    "zai:default": {
+      "type": "api_key",
+      "provider": "zai",
+      "key": "YOUR_ZAI_API_KEY_HERE"
+    }
+  },
+  "lastGood": {
+    "deepseek": "deepseek:default",
+    "zai": "zai:default"
+  },
+  "usageStats": {
+    "deepseek:default": {
+      "lastUsed": null,
+      "errorCount": 0
+    },
+    "zai:default": {
+      "lastUsed": null,
+      "errorCount": 0
+    }
+  }
+}
