@@ -60,11 +60,12 @@
 
 ### 🔴 紧急
 
-- [ ] **修复飞书权限**（错误代码：99991672）
-  ```bash
-  openclaw channels login feishu
-  openclaw logs --follow
-  ```
+- [x] **修复飞书权限**（错误代码：99991672）✅ 已完成
+  - ✅ 用户已在飞书开放平台开通 `cardkit:card:write` 权限
+  - ✅ 安全配置已优化：`dmPolicy` 改为 `pairing` 模式
+  - ✅ 配置验证：`allowFrom` 已清空（从 `["*"]` 改为 `[]`）
+  - ✅ Gateway 自动重载配置生效
+  - ✅ 飞书 WebSocket 连接正常
 
 ### 🟡 待规划
 
