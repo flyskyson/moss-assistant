@@ -1,0 +1,145 @@
+# Model Routing Configuration for EXECUTOR Agent
+# EXECUTOR Agent 智能模型路由配置
+# 2026-02-08 - 方案 1 + 方案 3 混合集成
+
+# EXECUTOR 角色定位：专用执行者、高频操作、批量任务处理
+# 专长模型：MiMo-V2-Flash（完全免费）、Devstral 2（Agent 专用）
+
+version: "1.0"
+description: "EXECUTOR Agent 智能路由 - 成本优先、批量处理、高频操作"
+
+# 路由规则优先级（EXECUTOR 特定）
+routing_rules:
+  # 规则 1: 批量文件处理（EXECUTOR 核心专长）
+  - name: "batch_file_processing"
+    priority: 100
+    condition:
+      task_types:
+        - "batch_file_process"
+        - "bulk_operation"
+    action:
+      use_model: "mimo-v2-flash"
+      reason: "EXECUTOR 专长：批量任务使用免费模型，成本优化"
+
+  # 规则 2: 高频重复操作
+  - name: "high_frequency_tasks"
+    priority: 95
+    condition:
+      task_types:
+        - "repetitive_task"
+        - "automation"
+    action:
+      use_model: "mimo-v2-flash"
+      reason: "EXECUTOR 专长：高频操作必须使用免费模型"
+
+  # 规则 3: Agent 工作流（需要工具调用稳定性）
+  - name: "agent_workflow"
+    priority: 90
+    condition:
+      task_types:
+        - "multi_file_orchestration"
+        - "tool_heavy"
+    action:
+      use_model: "devstral-2"
+      reason: "EXECUTOR 专长：复杂工作流使用 Agent 专用模型"
+
+  # 规则 4: 简单工具调用
+  - name: "simple_tool_calls"
+    priority: 70
+    condition:
+      task_types:
+        - "simple_api_call"
+        - "data_fetch"
+    action:
+      use_model: "mimo-v2-flash"
+      reason: "成本优化：简单工具调用使用免费模型"
+
+# 模型定义（EXECUTOR 偏好设置）
+models:
+  # EXECUTOR 的主力模型（免费！）
+  mimo-v2-flash:
+    provider: "openrouter"
+    model_id: "xiaomi/mimo-v2-flash"
+    features:
+      fast_responses: true
+      cost_level: "free"
+      price_input: "FREE"
+      price_output: "FREE"
+      performance: "匹配 Claude Sonnet 4.5"
+      context: "256K"
+      executor_specialty: true  # EXECUTOR 专长标记
+      best_for: ["batch_tasks", "high_frequency", "cost_sensitive"]
+
+  # EXECUTOR 的工作流专用模型
+  devstral-2:
+    provider: "openrouter"
+    model_id: "mistral/devstral-2-2512"
+    features:
+      agent_optimized: true
+      multi_file_orchestration: true
+      failure_recovery: true
+      cost_level: "free_tier"
+      price_input: "$0.05"
+      price_output: "$0.22"
+      performance: "73%+ SWE-bench，专为 Agent 设计"
+      best_for: ["agent_workflows", "complex_automation"]
+
+  # 降级模型（需要工具稳定性时）
+  minimax-m2.1:
+    provider: "openrouter"
+    model_id: "minimax/minimax-m2.1"
+    features:
+      reliable_tool_calling: true
+      cost_level: "low"
+      price_input: "$0.28"
+      price_output: "$1.00"
+      best_for: ["reliable_tool_use"]
+      performance: "72.5% SWE-Bench"
+
+# EXECUTOR 特定配置
+executor_config:
+  # 默认模型（成本优先）
+  default_model: "mimo-v2-flash"
+
+  # 成本优化策略（极度激进）
+  cost_optimization: "aggressive"
+
+  # 批量任务优化
+  batch_optimization:
+    enabled: true
+    prefer_free_model: true
+    max_cost_per_task: "$0.01"
+
+  # 并行处理配置
+  parallel_processing:
+    enabled: true
+    max_parallel_tasks: 10
+    default_model_for_parallel: "mimo-v2-flash"
+
+# 回退机制
+fallback:
+  enabled: true
+  max_retries: 3  # EXECUTOR 可以更多重试（低成本）
+
+  rules:
+    - condition: "free_model_rate_limited"
+      fallback_to: "devstral-2"
+
+    - condition: "tool_call_fails"
+      fallback_to: "minimax-m2.1"
+
+    - condition: "model_unavailable"
+      fallback_order:
+        - "devstral-2"
+        - "minimax-m2.1"
+
+# 监控和日志
+monitoring:
+  log_routing_decisions: true
+  log_file: "/Users/lijian/clawd/logs/executor-routing.log"
+  agent_name: "EXECUTOR"
+  track_metrics:
+    - model_selection
+    - task_completion_rate
+    - cost_tracking
+    - batch_efficiency

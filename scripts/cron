@@ -1,0 +1,2 @@
+#!/bin/bash
+/Users/lijian/clawd/scripts/gen-cron.sh "$@"

@@ -6,11 +6,32 @@ Skills define *how* tools work. This file is for *your* specifics — the stuff 
 
 Things like:
 - Camera names and locations
-- SSH hosts and aliases  
+- SSH hosts and aliases
 - Preferred voices for TTS
 - Speaker/room names
 - Device nicknames
+- API keys and endpoints
 - Anything environment-specific
+
+## 🔗 Web Search - Tavily API
+
+**Location:** `/Users/lijian/clawd/skills/tavily-search/`
+
+**API Key:** `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`
+
+**Usage:**
+```bash
+./skills/tavily-search/search.js "search query" [max_results]
+```
+
+**Features:**
+- AI-optimized search results
+- Automatic summarization
+- Content extraction
+- Works in China (no VPN needed)
+- Free tier: 1000 searches/month
+
+**Get more API keys:** https://tavily.com
 
 ## Examples
 

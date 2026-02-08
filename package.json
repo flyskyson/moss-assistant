@@ -1,0 +1,27 @@
+{
+  "name": "clawd",
+  "version": "1.0.0",
+  "description": "> MOSS 是我的认知伙伴（Cognitive Partner），基于 OpenClaw 多 Agent 系统构建。",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/flyskyson/moss-assistant.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/flyskyson/moss-assistant/issues"
+  },
+  "homepage": "https://github.com/flyskyson/moss-assistant#readme",
+  "dependencies": {
+    "@tavily/ai-sdk": "^0.4.1"
+  }
+}

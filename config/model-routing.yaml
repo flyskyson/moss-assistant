@@ -1,0 +1,224 @@
+# Model Routing Configuration
+# OpenClaw 智能模型路由配置
+# 2026-02-08 - 阶段 3 实施
+
+version: "1.0"
+description: "智能模型路由系统 - 根据任务复杂度自动选择最合适的模型"
+
+# 路由规则优先级（从高到低）
+routing_rules:
+  # 规则 1: 核心配置文件（最高优先级）
+  - name: "core_config_files"
+    priority: 100
+    condition:
+      file_patterns:
+        - "IDENTITY.md"
+        - "USER.md"
+        - "SOUL.md"
+        - "TASKS.md"
+        - "HEARTBEAT.md"
+    action:
+      use_model: "minimax-m2.1"
+      reason: "核心配置文件需要最高可靠性，MiniMax M2.1 编程性能优秀（72.5% SWE-Bench）"
+
+  # 规则 2: 包含中文/emoji 的文件编辑
+  - name: "chinese_emoji_editing"
+    priority: 90
+    condition:
+      task_type: "file_edit"
+      content_indicators:
+        has_chinese: true
+        has_emoji: true
+    action:
+      use_model: "minimax-m2.1"
+      reason: "MiniMax M2.1 无中文 tokenization 问题，编辑稳定可靠"
+
+  # 规则 3: 大文件编辑
+  - name: "large_file_editing"
+    priority: 80
+    condition:
+      task_type: "file_edit"
+      file_size:
+        min_lines: 100
+    action:
+      use_model: "minimax-m2.1"
+      reason: "大文件编辑需要更好的错误处理能力，MiniMax 工具调用稳定"
+
+  # 规则 4: 复杂代码任务
+  - name: "complex_code_tasks"
+    priority: 70
+    condition:
+      task_types:
+        - "code_refactoring"
+        - "architecture_design"
+        - "debugging_complex"
+    action:
+      use_model: "minimax-m2.1"
+      reason: "复杂代码任务使用 MiniMax M2.1，编程性能优秀且成本低廉（$1/M）"
+
+  # 规则 5: 深度分析
+  - name: "deep_analysis"
+    priority: 60
+    condition:
+      task_types:
+        - "research"
+        - "deep_reasoning"
+        - "strategic_planning"
+    action:
+      use_model: "deepseek-v3.2"
+      reason: "深度分析任务使用 DeepSeek V3.2，GPT-4o 性能的 97.5%，成本仅 1/40"
+
+  # 规则 6: 简单查询（默认，最低优先级）
+  - name: "simple_queries"
+    priority: 10
+    condition:
+      task_types:
+        - "quick_question"
+        - "simple_analysis"
+        - "information_lookup"
+      file_size:
+        max_lines: 50
+      content_indicators:
+        has_chinese: false
+        has_emoji: false
+    action:
+      use_model: "mimo-v2-flash"
+      reason: "简单查询使用 MiMo-V2-Flash，完全免费且性能匹配 Claude Sonnet 4.5"
+
+# 模型定义（使用 OpenRouter 高性价比模型）
+models:
+  # 编程 & 文件编辑专用（Claude Sonnet 平替）
+  minimax-m2.1:
+    provider: "openrouter"
+    model_id: "minimax/minimax-m2.1"
+    features:
+      reliable_tool_calling: true
+      no_tokenization_issues: true
+      excellent_for_code: true
+      cost_level: "low"
+      price_input: "$0.28"
+      price_output: "$1.00"
+      best_for: ["file_editing", "chinese_content", "complex_tasks", "coding"]
+      performance: "72.5% SWE-Bench (编程性能优秀)"
+
+  # 通用任务（性价比之王）
+  deepseek-v3.2:
+    provider: "openrouter"
+    model_id: "deepseek/deepseek-v3.2"
+    features:
+      complex_reasoning: true
+      better_error_handling: true
+      gpt4o_equivalent: "97.5%"
+      cost_level: "very_low"
+      price_input: "$0.25"
+      price_output: "$0.38"
+      best_for: ["deep_analysis", "complex_reasoning", "strategy", "general_tasks"]
+      performance: "GPT-4o 性能的 97.5%，成本仅 1/40"
+
+  # 快速查询（成本优化）
+  gemini-2.5-flash:
+    provider: "google"
+    model_id: "openrouter/google/gemini-2.5-flash"
+    features:
+      fast_responses: true
+      cost_effective: true
+      simple_reasoning: true
+      cost_level: "low"
+      price_input: "$0.30"
+      price_output: "$2.50"
+      limitations: ["chinese_tokenization", "edit_tool_issues"]
+      best_for: ["quick_queries", "simple_tasks"]
+
+  # 免费选项（零成本）
+  mimo-v2-flash:
+    provider: "openrouter"
+    model_id: "xiaomi/mimo-v2-flash"
+    features:
+      fast_responses: true
+      cost_level: "free"
+      price_input: "FREE"
+      price_output: "FREE"
+      performance: "匹配 Claude Sonnet 4.5"
+      best_for: ["experimentation", "learning", "budget_constrained"]
+      context: "256K"
+
+  # Agent 专用（免费）
+  devstral-2:
+    provider: "openrouter"
+    model_id: "mistral/devstral-2-2512"
+    features:
+      agent_optimized: true
+      multi_file_orchestration: true
+      failure_recovery: true
+      cost_level: "free_tier"
+      price_input: "$0.05"
+      price_output: "$0.22"
+      best_for: ["ai_agents", "multi_task", "complex_workflows"]
+      performance: "73%+ SWE-bench，专为 Agent 设计"
+
+# 任务类型定义
+task_types:
+  file_edit: "编辑文件内容"
+  quick_question: "快速查询"
+  simple_analysis: "简单分析"
+  code_refactoring: "代码重构"
+  architecture_design: "架构设计"
+  debugging_complex: "复杂调试"
+  research: "研究任务"
+  deep_reasoning: "深度推理"
+  strategic_planning: "战略规划"
+  information_lookup: "信息查询"
+
+# 成本优化配置
+cost_optimization:
+  enabled: true
+  strategy: "cost_effective_with_reliability"
+
+  # 成本权重（权重越高越倾向于成本优化）
+  weights:
+    reliability: 0.6  # 可靠性权重
+    speed: 0.2       # 速度权重
+    cost: 0.2        # 成本权重（提高成本权重）
+
+  # 预期节省（相比 Gemini Pro/Flash 原配置）
+  estimated_savings: "85%"
+  estimated_reliability: "95%"
+
+  # 价格对比（每 1M tokens）
+  old_config:
+    gemini_pro: "$2.50 / $10"
+    gemini_flash: "$0.30 / $2.50"
+    monthly_estimate: "$22-31"
+  new_config:
+    minimax_m2_1: "$0.28 / $1.00"
+    deepseek_v3_2: "$0.25 / $0.38"
+    mimo_flash: "FREE"
+    monthly_estimate: "$2.60"
+
+# 回退机制
+fallback:
+  enabled: true
+  max_retries: 2
+
+  rules:
+    - condition: "edit_tool_fails_3_times"
+      fallback_to: "deepseek-v3.2"
+
+    - condition: "task_exceeds_3_minutes"
+      fallback_to: "deepseek-v3.2"
+
+    - condition: "model_unavailable"
+      fallback_order:
+        - "deepseek-v3.2"
+        - "minimax-m2.1"
+        - "gemini-2.5-flash"
+
+# 监控和日志
+monitoring:
+  log_routing_decisions: true
+  log_file: "/Users/lijian/clawd/logs/model-routing.log"
+  track_metrics:
+    - model_selection
+    - routing_reason
+    - task_completion_time
+    - error_count

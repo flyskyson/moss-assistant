@@ -1,0 +1,144 @@
+# Model Routing Configuration for LEADER Agent
+# LEADER Agent 智能模型路由配置
+# 2026-02-08 - 方案 1 + 方案 3 混合集成
+
+# LEADER 角色定位：社群协调者、任务分解、Agent 分配决策
+# 专长模型：DeepSeek V3.2（复杂推理、GPT-4o 的 97.5% 性能）
+
+version: "1.0"
+description: "LEADER Agent 智能路由 - 任务分解、协调决策、全局优化"
+
+# 路由规则优先级（LEADER 特定）
+routing_rules:
+  # 规则 1: 任务分解和战略规划（LEADER 核心职责）
+  - name: "task_decomposition"
+    priority: 100
+    condition:
+      task_types:
+        - "task_decomposition"
+        - "strategic_planning"
+        - "agent_coordination"
+    action:
+      use_model: "deepseek-v3.2"
+      reason: "LEADER 专长：复杂任务分解需要强大推理能力"
+
+  # 规则 2: Agent 能力评估和匹配
+  - name: "agent_matching"
+    priority: 95
+    condition:
+      task_types:
+        - "agent_selection"
+        - "capability_assessment"
+    action:
+      use_model: "deepseek-v3.2"
+      reason: "LEADER 专长：Agent 匹配需要理解全局状态"
+
+  # 规则 3: 冲突解决
+  - name: "conflict_resolution"
+    priority: 90
+    condition:
+      task_types:
+        - "conflict_resolution"
+        - "priority_management"
+    action:
+      use_model: "deepseek-v3.2"
+      reason: "LEADER 专长：冲突解决需要深度推理"
+
+  # 规则 4: 简单协调任务（降级到低成本模型）
+  - name: "simple_coordination"
+    priority: 50
+    condition:
+      task_types:
+        - "status_check"
+        - "simple_dispatch"
+    action:
+      use_model: "minimax-m2.1"
+      reason: "成本优化：简单协调任务使用 MiniMax"
+
+# 模型定义（LEADER 偏好设置）
+models:
+  # LEADER 的主力模型
+  deepseek-v3.2:
+    provider: "openrouter"
+    model_id: "deepseek/deepseek-v3.2"
+    features:
+      complex_reasoning: true
+      better_error_handling: true
+      gpt4o_equivalent: "97.5%"
+      cost_level: "very_low"
+      price_input: "$0.25"
+      price_output: "$0.38"
+      leader_specialty: true  # LEADER 专长标记
+      best_for: ["task_decomposition", "agent_coordination", "strategy"]
+      performance: "GPT-4o 性能的 97.5%，成本仅 1/40"
+
+  # LEADER 的成本优化模型
+  minimax-m2.1:
+    provider: "openrouter"
+    model_id: "minimax/minimax-m2.1"
+    features:
+      good_reasoning: true
+      cost_level: "low"
+      price_input: "$0.28"
+      price_output: "$1.00"
+      best_for: ["simple_coordination", "status_checks"]
+      performance: "编程性能优秀，推理能力良好"
+
+  # 备用模型
+  gemini-2.5-pro:
+    provider: "google"
+    model_id: "openrouter/google/gemini-2.5-pro"
+    features:
+      complex_reasoning: true
+      cost_level: "medium"
+      price_input: "$2.50"
+      price_output: "$10.00"
+      best_for: ["fallback", "complex_tasks"]
+
+# LEADER 特定配置
+leader_config:
+  # 默认模型
+  default_model: "deepseek-v3.2"
+
+  # 任务分配映射（路由建议 → Agent 选择）
+  agent_mapping:
+    minimax-m2.1:
+      - "MOSS"  # 文件编辑、中文内容
+    deepseek-v3.2:
+      - "THINKER"  # 深度分析
+      - "LEADER"  # 协调任务
+    mimo-v2-flash:
+      - "EXECUTOR"  # 批量任务
+    devstral-2:
+      - "COORDINATOR"  # 工作流编排
+
+  # 成本优化策略
+  cost_optimization: true
+
+  # 全局优化（考虑所有 Agent 的总成本）
+  global_optimization: true
+
+# 回退机制
+fallback:
+  enabled: true
+  max_retries: 2
+
+  rules:
+    - condition: "coordination_fails"
+      fallback_to: "minimax-m2.1"
+
+    - condition: "model_unavailable"
+      fallback_order:
+        - "minimax-m2.1"
+        - "gemini-2.5-pro"
+
+# 监控和日志
+monitoring:
+  log_routing_decisions: true
+  log_file: "/Users/lijian/clawd/logs/leader-routing.log"
+  agent_name: "LEADER"
+  track_metrics:
+    - model_selection
+    - agent_dispatch
+    - task_distribution
+    - global_cost_tracking

@@ -1,0 +1,164 @@
+# Model Routing Configuration for MOSS Agent
+# MOSS Agent 智能模型路由配置
+# 2026-02-08 - 方案 1 + 方案 3 混合集成
+
+# MOSS 角色定位：主力 Agent、文件编辑专家、中文内容处理
+# 专长模型：MiniMax M2.1（编程性能优秀，无中文问题）
+
+version: "1.0"
+description: "MOSS Agent 智能路由 - 文件编辑优化，中文内容可靠"
+
+# 路由规则优先级（MOSS 特定）
+routing_rules:
+  # 规则 1: 核心配置文件（最高优先级）
+  - name: "core_config_files"
+    priority: 100
+    condition:
+      file_patterns:
+        - "IDENTITY.md"
+        - "USER.md"
+        - "SOUL.md"
+        - "TASKS.md"
+        - "HEARTBEAT.md"
+    action:
+      use_model: "minimax-m2.1"
+      reason: "MOSS 专长：核心配置文件需要最高可靠性"
+
+  # 规则 2: 包含中文/emoji 的文件编辑（MOSS 核心专长）
+  - name: "chinese_emoji_editing"
+    priority: 95
+    condition:
+      task_type: "file_edit"
+      content_indicators:
+        has_chinese: true
+        has_emoji: true
+    action:
+      use_model: "minimax-m2.1"
+      reason: "MOSS 专长：中文/emoji 编辑，MiniMax 无 tokenization 问题"
+
+  # 规则 3: 大文件编辑（MOSS 擅长）
+  - name: "large_file_editing"
+    priority: 85
+    condition:
+      task_type: "file_edit"
+      file_size:
+        min_lines: 100
+    action:
+      use_model: "minimax-m2.1"
+      reason: "MOSS 专长：大文件编辑需要更好的错误处理"
+
+  # 规则 4: 复杂代码任务（MOSS 擅长）
+  - name: "complex_code_tasks"
+    priority: 75
+    condition:
+      task_types:
+        - "code_refactoring"
+        - "architecture_design"
+        - "debugging_complex"
+    action:
+      use_model: "minimax-m2.1"
+      reason: "MOSS 专长：编程任务，MiniMax 性能优秀（72.5% SWE-Bench）"
+
+  # 规则 5: 简单查询（降级到免费模型）
+  - name: "simple_queries"
+    priority: 10
+    condition:
+      task_types:
+        - "quick_question"
+        - "simple_analysis"
+        - "information_lookup"
+      file_size:
+        max_lines: 50
+      content_indicators:
+        has_chinese: false
+        has_emoji: false
+    action:
+      use_model: "mimo-v2-flash"
+      reason: "成本优化：简单查询使用免费模型"
+
+# 模型定义（MOSS 偏好设置）
+models:
+  # MOSS 的主力模型
+  minimax-m2.1:
+    provider: "openrouter"
+    model_id: "minimax/minimax-m2.1"
+    features:
+      reliable_tool_calling: true
+      no_tokenization_issues: true
+      excellent_for_code: true
+      cost_level: "low"
+      price_input: "$0.28"
+      price_output: "$1.00"
+      moss_specialty: true  # MOSS 专长标记
+      best_for: ["file_editing", "chinese_content", "complex_tasks", "coding"]
+      performance: "72.5% SWE-Bench (编程性能优秀)"
+
+  # MOSS 的成本优化模型
+  mimo-v2-flash:
+    provider: "openrouter"
+    model_id: "xiaomi/mimo-v2-flash"
+    features:
+      fast_responses: true
+      cost_level: "free"
+      price_input: "FREE"
+      price_output: "FREE"
+      performance: "匹配 Claude Sonnet 4.5"
+      best_for: ["quick_queries", "cost_sensitive_tasks"]
+      context: "256K"
+
+  # 备用模型（降级使用）
+  deepseek-v3.2:
+    provider: "openrouter"
+    model_id: "deepseek/deepseek-v3.2"
+    features:
+      complex_reasoning: true
+      cost_level: "very_low"
+      price_input: "$0.25"
+      price_output: "$0.38"
+      best_for: ["general_tasks", "fallback"]
+      performance: "GPT-4o 性能的 97.5%"
+
+# MOSS 特定配置
+moss_config:
+  # 默认模型（当没有规则匹配时）
+  default_model: "minimax-m2.1"
+
+  # 成本优化策略
+  cost_optimization: true
+
+  # 中文内容优先级（MOSS 核心专长）
+  chinese_content_priority: "high"
+
+  # 文件编辑策略
+  file_edit_strategy:
+    default: "write"  # 默认使用 Write 策略
+    max_lines_for_edit: 50  # 超过 50 行强制用 Write
+    chinese_emoji_use_write: true  # 中文/emoji 强制用 Write
+
+# 回退机制
+fallback:
+  enabled: true
+  max_retries: 2
+
+  rules:
+    - condition: "edit_tool_fails_3_times"
+      fallback_to: "deepseek-v3.2"
+
+    - condition: "task_exceeds_3_minutes"
+      fallback_to: "deepseek-v3.2"
+
+    - condition: "model_unavailable"
+      fallback_order:
+        - "deepseek-v3.2"
+        - "gemini-2.5-flash"
+
+# 监控和日志
+monitoring:
+  log_routing_decisions: true
+  log_file: "/Users/lijian/clawd/logs/moss-routing.log"
+  agent_name: "MOSS"
+  track_metrics:
+    - model_selection
+    - routing_reason
+    - task_completion_time
+    - cost_tracking

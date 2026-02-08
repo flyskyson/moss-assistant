@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "skills": {
+    "brave-search": {
+      "version": "1.0.1",
+      "installedAt": 1770368460923
+    },
+    "ai-cron-gen": {
+      "version": "1.0.1",
+      "installedAt": 1770439131189
+    }
+  }
+}

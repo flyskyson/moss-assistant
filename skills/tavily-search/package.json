@@ -1,0 +1,12 @@
+{
+  "name": "tavily-search",
+  "version": "1.0.0",
+  "description": "Tavily Search API for OpenClaw",
+  "main": "search.js",
+  "bin": {
+    "tavily-search": "./search.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.7.0"
+  }
+}

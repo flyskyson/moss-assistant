@@ -1,0 +1,130 @@
+# 知识库导航索引
+
+> **最后更新**：2026-02-07
+> **版本**：v1.2
+> **组织方式**：PARA + OpenClaw 官方最佳实践
+
+---
+
+## 📊 快速统计
+
+| 类别 | 数量 | 说明 |
+|------|------|------|
+| 🎯 **活跃项目** | 3 个 | 正在进行的项目 |
+| 📖 **技术文档** | 2 个 | areas/ 技术文档 |
+| 📄 **维护记录** | 30+ 个 | docs/ 总结文档 |
+| 🔧 **脚本工具** | 10 个 | 自动化脚本 |
+| ⚙️ **核心配置** | 5 个 | SOUL/USER/AGENTS/MEMORY/TOOLS |
+
+---
+
+## 🎯 快速导航
+
+### 核心配置（MOSS 每次会话读取）
+
+- **[SOUL.md](SOUL.md)** - MOSS 的性格、原则、边界
+- **[USER.md](USER.md)** - 用户信息、偏好、时区
+- **[AGENTS.md](AGENTS.md)** - 行为规则、工具配置
+- **[MEMORY.md](MEMORY.md)** - 长期记忆、重要知识
+- **[TOOLS.md](TOOLS.md)** - 工具配置、API 密钥
+
+---
+
+## 📚 知识库
+
+### 🎯 活跃项目
+
+#### 1. 企业微信迁移方案
+- **📁 文件**: [projects/ENTERPRISE-WECHAT-MIGRATION-PLAN.md](projects/ENTERPRISE-WECHAT-MIGRATION-PLAN.md)
+- **📝 说明**: 企业微信迁移计划和时间表
+- **🚦 状态**: 规划中
+- **📅 最后更新**: 2026-02-05
+- **🎯 优先级**: 高
+
+#### 2. MOSS 优化计划
+- **📁 文件**: [projects/MOSS-OPTIMIZATION-PLAN.md](projects/MOSS-OPTIMIZATION-PLAN.md)
+- **📝 说明**: MOSS 性能和交互优化方案
+- **🚦 状态**: 规划中
+- **🎯 优先级**: 中
+
+#### 3. 多 Agent 协作架构
+- **📁 文件**: [projects/MULTI-AGENT-PLAN.md](projects/MULTI-AGENT-PLAN.md)
+- **📝 说明**: Phase 2 多 Agent 协作架构设计
+- **🚦 状态**: 规划中
+- **📅 最后更新**: 2026-02-04
+- **🎯 优先级**: 中
+
+
+### 📖 技术领域
+
+- **[areas/技术文档/](areas/技术文档/)** - OpenClaw 相关技术文档
+  - OPENCLAW-AGENT-TRAINING-GUIDE.md
+  - OPENCLAW-UPGRADE-GUIDE.md
+
+### 📋 维护文档
+
+- **[docs/](docs/)** - 操作记录和总结 (部分列表)
+  - [MOSS-MEMORY-AUTO-MANUAL.md](docs/MOSS-MEMORY-AUTO-MANUAL.md) - MOSS 记忆机制调研报告
+  - [MEMORY-WORKFLOW-QUICK-START.md](docs/MEMORY-WORKFLOW-QUICK-START.md) - 记忆工作流快速上手
+  - [DAILY-TASKS-GUIDE.md](docs/DAILY-TASKS-GUIDE.md) - 每日任务系统指南
+  - [HEARTBEAT-TASK-DESIGN.md](docs/HEARTBEAT-TASK-DESIGN.md) - 心跳任务设计文档
+  - [FINAL-MOSS-TAVILY-FIX.md](docs/FINAL-MOSS-TAVILY-FIX.md) - 搜索功能修复总结
+  - [ENTERPRISE-WECHAT-MIGRATION-PLAN.md](projects/ENTERPRISE-WECHAT-MIGRATION-PLAN.md) - 企业微信迁移方案
+  - ... (更多文件请直接浏览 `docs` 目录)
+
+### 🔧 工具脚本
+
+- **[scripts/](scripts/)** - 自动化脚本
+
+#### 系统与记忆
+- **check-system-status.sh** ⭐ - 一键检查所有服务状态
+- **memory-maintenance.sh** (newday) ⭐ - 创建每日记忆文件
+- **organize-knowledge.sh** - 知识库整理（PARA 结构）
+- **weekly-knowledge-check.sh** - 每周知识库健康检查
+
+#### MOSS 交互与故障排除
+- **init-moss-session.sh** (mi) ⭐ - MOSS 会话标准化初始化
+- **moss-init.sh** - (旧版) 初始化脚本
+- **fix-moss-cache.sh** - 修复 MOSS 缓存问题
+- **force-moss-read-config.sh** - 强制刷新配置
+- **test-search-moss.sh** - 测试搜索功能
+- **daily-health-check.sh** - 每日健康检查
+
+---
+
+## 🧠 记忆系统
+
+### 长期记忆
+- **[MEMORY.md](MEMORY.md)** - 精炼的知识和经验
+
+### 每日笔记
+- **[memory/](memory/)** - 原始记录
+  - `memory/YYYY-MM-DD.md`
+
+---
+
+## 📊 维护指南
+
+(内容保持不变, 此处省略)
+
+---
+
+## 🎯 使用指南
+
+(内容保持不变, 此处省略)
+
+---
+
+## 🔄 更新日志
+
+| 日期 | 版本 | 变更 | 说明 |
+|------|------|------|------|
+| 2026-02-07 | v1.2 | 全面更新 | 根据当前文件结构，更新了所有文档和脚本索引 |
+| 2026-02-06 | v1.1 | 优化项目展示 | 添加项目状态、优先级、更新时间 |
+| 2026-02-06 | v1.0 | 创建 | 初始版本，基于 PARA 系统 |
+
+---
+
+## 📚 参考资料
+
+(内容保持不变, 此处省略)
