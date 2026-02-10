@@ -1,0 +1,37 @@
+{
+  "name": "bark-push",
+  "version": "1.0.0",
+  "description": "通过 Bark 服务向 iOS/Android 设备发送推送通知",
+  "main": "bark-push.ts",
+  "author": "MOSS",
+  "license": "MIT",
+  "openclaw": {
+    "type": "skill",
+    "entry": "bark-push.ts",
+    "commands": [
+      {
+        "name": "bark",
+        "description": "发送 Bark 推送通知",
+        "usage": "/bark \"标题\" \"内容\" [--sound=声音] [--group=分组]",
+        "examples": [
+          "/bark \"测试\" \"这是一条测试消息\"",
+          "/bark \"任务完成\" \"代码已部署\" --sound=bell",
+          "/bark \"错误\" \"服务异常\" --sound=alarm --group=警报"
+        ]
+      }
+    ],
+    "environment": {
+      "BARK_SERVER": {
+        "description": "Bark 服务器地址",
+        "default": "http://8.163.19.50:8080",
+        "required": false
+      },
+      "BARK_DEVICE_KEY": {
+        "description": "Bark 设备密钥",
+        "default": "",
+        "required": true
+      }
+    },
+    "dependencies": []
+  }
+}

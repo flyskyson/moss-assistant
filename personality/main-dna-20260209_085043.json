@@ -1,0 +1,33 @@
+{
+  "version": 2,
+  "agent_id": "main",
+  "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+  "generated_by": "manual-extraction",
+  
+  "core_identity": {
+    "identity_md": $(cat ~/clawd/IDENTITY.md | jq -Rs .),
+    "source_file": "IDENTITY.md"
+  },
+  
+  "accumulated_experience": {
+    "experience_md": $(cat ~/clawd/EXPERIENCE.md 2>/dev/null | head -c 50000 | jq -Rs .),
+    "source_file": "EXPERIENCE.md"
+  },
+  
+  "key_memory": {
+    "memory_md": $(cat ~/clawd/MEMORY.md 2>/dev/null | head -c 30000 | jq -Rs .),
+    "source_file": "MEMORY.md"
+  },
+  
+  "session_stats": {
+    "total_sessions": $(ls -1 ~/.openclaw/agents/main/sessions/*.jsonl 2>/dev/null | wc -l),
+    "total_size": "$(du -sh ~/.openclaw/agents/main/sessions 2>/dev/null | cut -f1)",
+    "session_dir": "$HOME/.openclaw/agents/main/sessions"
+  },
+  
+  "metadata": {
+    "extraction_date": "$(date '+%Y-%m-%d %H:%M:%S')",
+    "workspace": "$HOME/clawd",
+    "agent_dir": "$HOME/.openclaw/agents/main"
+  }
+}

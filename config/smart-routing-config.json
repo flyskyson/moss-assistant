@@ -1,0 +1,94 @@
+{
+  "version": 1,
+  "routing_strategy": "cost_optimized",
+
+  "models": {
+    "deepseek_official": {
+      "provider": "deepseek",
+      "model": "deepseek-chat",
+      "cost_per_million_tokens": 0.14,
+      "priority": 1,
+      "use_cases": ["日常交互", "编程", "调试", "测试", "分析"],
+      "usage_percentage": 95
+    },
+
+    "gpt4o": {
+      "provider": "openai",
+      "model": "gpt-4o",
+      "cost_per_million_tokens": 2.5,
+      "priority": 2,
+      "use_cases": ["关键决策", "复杂推理", "架构设计"],
+      "usage_percentage": 4,
+      "max_tokens_per_request": 10000
+    },
+
+    "claude_opus": {
+      "provider": "anthropic",
+      "model": "claude-opus-3.5",
+      "cost_per_million_tokens": 15,
+      "priority": 3,
+      "use_cases": ["深度研究", "紧急任务"],
+      "usage_percentage": 1,
+      "max_tokens_per_request": 5000,
+      "daily_budget": 5000
+    }
+  },
+
+  "cost_control": {
+    "daily_budget_yuan": 50,
+    "alert_threshold": 30,
+    "emergency_cutoff": 60,
+
+    "token_limits": {
+      "per_session": 100000,
+      "per_day": 1000000,
+      "per_week": 5000000
+    },
+
+    "caching": {
+      "enabled": true,
+      "cache_similar_queries": true,
+      "cache_duration_hours": 24
+    }
+  },
+
+  "intelligent_routing": {
+    "rules": [
+      {
+        "condition": "task_type == 'debugging' || task_type == 'testing'",
+        "route_to": "deepseek_official",
+        "reason": "高频交互，必须用低成本模型"
+      },
+      {
+        "condition": "token_count > 50000",
+        "route_to": "deepseek_official",
+        "reason": "大token量必须控制成本"
+      },
+      {
+        "condition": "task_type == 'research' && complexity == 'high' && token_count < 5000",
+        "route_to": "claude_opus",
+        "reason": "少量高价值任务可以用好模型"
+      },
+      {
+        "condition": "task_type == 'architecture' && urgency == 'high'",
+        "route_to": "gpt4o",
+        "reason": "架构设计值得投资"
+      }
+    ],
+
+    "fallback": "deepseek_official"
+  },
+
+  "cost_optimization": {
+    "context_compression": true,
+    "remove_redundant_info": true,
+    "use_summarization": true,
+    "batch_similar_requests": true
+  },
+
+  "monitoring": {
+    "track_costs": true,
+    "log_expensive_queries": true,
+    "weekly_report": true
+  }
+}

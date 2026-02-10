@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "sharedMemory": {
+    "enabled": true,
+    "basePath": "/tmp/openclaw-shared",
+    "maxObjectSize": "10MB",
+    "cleanupInterval": 3600
+  },
+  "agents": {
+    "main": {
+      "sharedMemoryPath": "/tmp/openclaw-shared/main",
+      "role": "planner",
+      "responsibilities": [
+        "高层规划",
+        "决策制定",
+        "任务分配"
+      ]
+    },
+    "leader-agent-v2": {
+      "sharedMemoryPath": "/tmp/openclaw-shared/leader",
+      "role": "executor",
+      "responsibilities": [
+        "任务分解",
+        "执行协调",
+        "进度跟踪"
+      ]
+    },
+    "utility-agent-v2": {
+      "sharedMemoryPath": "/tmp/openclaw-shared/utility",
+      "role": "tool_operator",
+      "responsibilities": [
+        "批量处理",
+        "工具操作",
+        "数据转换"
+      ]
+    }
+  },
+  "communication": {
+    "protocol": "file-based",
+    "serialization": "json",
+    "compression": true,
+    "maxInMemorySize": "1MB"
+  }
+}

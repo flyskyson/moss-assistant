@@ -1,0 +1,46 @@
+{
+  "version": 2,
+  "agent_id": "main",
+  "timestamp": "2026-02-09T08:50:43Z",
+  "generated_by": "agent-personality-dna.sh",
+  "extraction_date": "2026-02-09 08:50",
+
+  "core_identity": {
+    "identity_file": "~/clawd/IDENTITY.md",
+    "identity_preview": "MOSS - 飞天的AI助手和认知伙伴",
+    "key_traits": ["教学式", "引导式", "主动性"],
+    "source_file": "IDENTITY.md"
+  },
+
+  "accumulated_experience": {
+    "experience_file": "~/clawd/EXPERIENCE.md",
+    "recent_entries": "年轻化经验提取记录",
+    "source_file": "EXPERIENCE.md"
+  },
+
+  "key_memory": {
+    "memory_file": "~/clawd/MEMORY.md",
+    "key_topics": ["项目状态", "任务跟踪", "知识库"],
+    "source_file": "MEMORY.md"
+  },
+
+  "session_stats": {
+    "total_sessions": 10,
+    "total_size": "6.1M",
+    "session_dir": "~/.openclaw/agents/main/sessions",
+    "health_status": "good"
+  },
+
+  "performance": {
+    "response_time": "2 seconds",
+    "cleanup_date": "2026-02-09",
+    "previous_response_time": "170+ seconds",
+    "improvement": "99%"
+  },
+
+  "metadata": {
+    "extraction_date": "2026-02-09 08:50:43",
+    "workspace": "~/clawd",
+    "agent_dir": "~/.openclaw/agents/main"
+  }
+}

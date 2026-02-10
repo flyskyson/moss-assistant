@@ -100,6 +100,7 @@
 - **[skills/daily-briefing/briefing.js](skills/daily-briefing/briefing.js)** ⭐ - AI & Tech 每日简报生成脚本 (Node.js + Tavily SDK)
 - **[scripts/update-core-configs.sh](scripts/update-core-configs.sh)** (新增) - 辅助 MOSS 进行核心配置文件统一更新（用于内部维护）
 - **[scripts/task-status-updater.sh](scripts/task-status-updater.sh)** (新增) - 辅助 MOSS 更新 TASKS.md 项目状态
+- **[scripts/daily-retrospect.sh](scripts/daily-retrospect.sh)** (新增) - 每日自动复盘系统（22:30 自动执行）
 
 #### 智能路由系统
 - **[scripts/agent-router-integration.py](scripts/agent-router-integration.py)** ⭐ - 智能模型路由决策引擎

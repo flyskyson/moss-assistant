@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "thresholds": {
+    "simple_max_steps": 10,
+    "complex_min_steps": 30,
+    "max_parallel_tasks": 5
+  },
+  "keywords": {
+    "simple": [
+      "解释",
+      "翻译",
+      "总结",
+      "单个",
+      "简单",
+      "快速",
+      "直接"
+    ],
+    "complex": [
+      "并行",
+      "协作",
+      "多步骤",
+      "复杂",
+      "分析",
+      "研究",
+      "调研",
+      "优化",
+      "重构",
+      "批量"
+    ]
+  },
+  "modes": {
+    "single-agent": {
+      "description": "单个 Agent 处理（更快、更简单）",
+      "agents": ["main"],
+      "use_cases": [
+        "问答",
+        "简单翻译",
+        "文本生成",
+        "代码解释",
+        "快速查询"
+      ]
+    },
+    "multi-agent": {
+      "description": "多 Agent 协作（更适合复杂任务）",
+      "agents": ["main", "leader-agent-v2", "utility-agent-v2"],
+      "use_cases": [
+        "复杂研究",
+        "并行处理",
+        "多步骤任务",
+        "批量操作",
+        "跨领域分析"
+      ]
+    }
+  },
+  "optimization": {
+    "enable_shared_memory": true,
+    "enable_task_cache": true,
+    "enable_result_reuse": true,
+    "cache_ttl": 3600
+  }
+}

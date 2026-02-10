@@ -1,0 +1,50 @@
+# OpenClaw 工作区扫描排除规则
+# 用于优化 Agent 启动性能
+
+# 依赖目录
+node_modules/
+.npm/
+
+# 版本控制
+.git/
+.svn/
+
+# 构建输出
+dist/
+build/
+out/
+*.tsbuildinfo
+
+# 日志文件
+*.log
+logs/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 备份文件
+backups/
+sessions-backup/
+*.backup.*
+*.bak
+
+# OpenClaw 专用
+diagnostics/
+proactive-data/
+.sessions/
+
+# 临时文件
+tmp/
+temp/
+*.tmp
+
+# 测试覆盖率
+coverage/
+.nyc_output/
+
+# IDE 配置
+.vscode/
+.idea/
+*.swp
+*.swo
